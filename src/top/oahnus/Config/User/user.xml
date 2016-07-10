@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 用包名接口名作namespace的名称 -->
+<mapper namespace="top.oahnus.Dao.IUser">
+  <resultMap type="top.oahnus.Bean.User" id="RetUser">
+    <result column="USER_ID" jdbcType="VARCHAR" property="userID"/>
+    <result column="USERNAME" jdbcType="VARCHAR" property="username"/>
+    <result column="PASSWORD" jdbcType="VARCHAR" property="password"/>
+    <result column="INFO" jdbcType="VARCHAR" property="info"/>
+    <result column="BORN" jdbcType="DATE" property="born"/>
+    <result column="SEX" jdbcType="VARCHAR" property="sex"/>
+    <result column="ADDRESS" jdbcType="VARCHAR" property="address"/>
+    <result column="FIGURE" jdbcType="VARCHAR" property="figure"/>
+  </resultMap>
+
+  <select id="vertifyUser" parameterType="top.oahnus.Bean.User" resultMap="RetUser">
+    SELECT USER_ID, USERNAME, PASSWORD, INFO, BORN, SEX, ADDRESS, FIGURE FROM user WHERE USER_ID = #{userID} AND PASSWORD = #{password}
+  </select>
+
+</mapper>
