@@ -19,4 +19,8 @@
     SELECT USER_ID, USERNAME, PASSWORD, INFO, BORN, SEX, ADDRESS, FIGURE FROM user WHERE USER_ID = #{userID} AND PASSWORD = #{password}
   </select>
 
+  <select id="getFriendsList" parameterType="String" resultMap="RetUser">
+    SELECT USER_ID, USERNAME, PASSWORD, INFO, BORN, SEX, ADDRESS, FIGURE FROM user WHERE USER_ID IN (SELECT friend_id FROM friend WHERE user_id = #{_parameter})
+  </select>
+
 </mapper>

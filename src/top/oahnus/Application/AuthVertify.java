@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 
 /**
  * Created by oahnus on 2016/7/4.
@@ -92,11 +93,15 @@ System.out.println("输出");
         AuthVertify authVertify = new AuthVertify();
         authVertify.init();
         authVertify.runApp();
+
+//测试
 //        User user = new User();
 //        user.setUserID("10000");
 //        user.setPassword("b86d51d4ce12cdf48d69ed20063bfd40");
 //
 //        User ret = authVertify.vertify(user);
+//
+//        System.out.println(ret.getFigureImage());
 //
 //        System.out.println(ret.getUsername());
 //        System.out.println(ret.getUserID());
@@ -106,5 +111,10 @@ System.out.println("输出");
 //        System.out.println(ret.getAddress());
 //        System.out.println(ret.getSex());
 //        System.out.println(ret.getFigure());
+//
+//        List<User> list = ret.getFriendsList();
+//        for(int i=0;i<list.size();i++){
+//            System.out.println(list.get(i).getUsername());
+//        }
     }
 }
