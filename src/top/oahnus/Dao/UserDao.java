@@ -11,20 +11,22 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.*;
+import java.util.List;
 
 /**
  * Created by oahnus on 2016/7/4.
  */
-public class VertifyDao {
+public class UserDao {
 
     private String basePath = "";
 
-    public VertifyDao(){
+    public UserDao(){
         basePath = System.getProperty("user.dir");
 //        basePath = basePath.substring(1,basePath.l);
     }
 
-    public User vertify(User user){
+    public User getUserFromDB(User user){
         SqlSession sqlSession = null;
         User retUser = null;
         try {
@@ -55,5 +57,25 @@ public class VertifyDao {
         }
 
         return retUser;
+    }
+
+    public List<String> getFriendsID(String userID){
+        SqlSession sqlSession = null;
+        List<String> idList   = null;
+
+        try {
+            Reader reader = Resources.getResourceAsReader("top/oahnus/Config/Configuration.xml");
+            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+
+            sqlSession = sqlSessionFactory.openSession();
+
+            IUser iUser = sqlSession.getMapper(IUser.class);
+            idList = iUser.getFriendsID(userID);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return idList;
     }
 }

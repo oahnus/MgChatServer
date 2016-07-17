@@ -1,7 +1,7 @@
 package top.oahnus.Application;
 
 import top.oahnus.Bean.User;
-import top.oahnus.Dao.VertifyDao;
+import top.oahnus.Dao.UserDao;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -9,12 +9,11 @@ import java.io.ObjectOutputStream;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.List;
 
 /**
  * Created by oahnus on 2016/7/4.
  */
-public class AuthVertify {
+public class AuthVertify implements Runnable{
 
     private ServerSocket serverSocket;
     private Socket socket;
@@ -43,8 +42,8 @@ System.out.println("socket error");
     }
 
     public User vertify(User user){
-        VertifyDao vertifyDao = new VertifyDao();
-        return vertifyDao.vertify(user);
+        UserDao userDao = new UserDao();
+        return userDao.getUserFromDB(user);
     }
 
     public void runApp(){
@@ -89,10 +88,13 @@ System.out.println("输出");
         }
     }
 
+    @Override
+    public void run() {
+        init();
+        runApp();
+    }
     public static void main(String[] args){
         AuthVertify authVertify = new AuthVertify();
-        authVertify.init();
-        authVertify.runApp();
 
 //测试
 //        User user = new User();
@@ -117,4 +119,5 @@ System.out.println("输出");
 //            System.out.println(list.get(i).getUsername());
 //        }
     }
+
 }

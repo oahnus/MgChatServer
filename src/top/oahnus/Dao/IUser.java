@@ -10,4 +10,5 @@ import java.util.List;
 public interface IUser {
     User vertifyUser(User user);
     List<User> getFriendsList(String id);
+    List<String> getFriendsID(String id);
 }

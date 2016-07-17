@@ -23,4 +23,8 @@
     SELECT USER_ID, USERNAME, PASSWORD, INFO, BORN, SEX, ADDRESS, FIGURE FROM user WHERE USER_ID IN (SELECT friend_id FROM friend WHERE user_id = #{_parameter})
   </select>
 
+  <select id="getFriendsID" parameterType="String" resultType="String">
+    SELECT friend_id FROM friend WHERE user_id = #{_parameter}
+  </select>
+
 </mapper>
