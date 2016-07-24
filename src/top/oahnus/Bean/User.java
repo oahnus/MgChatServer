@@ -31,6 +31,16 @@ public class User implements Serializable{
     //头像
     private Image figureImage;
     //好友列表
+    private String email;
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     private List<User> friendsList;
 
     public  Image getFigureImage() {

@@ -1,13 +1,24 @@
 package top.oahnus.Bean;
 
+import java.io.Serializable;
+
 /**
  * Created by oahnus on 2016/7/20.
  */
-public class Message {
+public class Message implements Serializable{
     private static final long serialVersionUID = 1234L;
 
     private String code;
     private String targetID;
+    private String sourceID;
+
+    public String getSourceID() {
+        return sourceID;
+    }
+
+    public void setSourceID(String sourceID) {
+        this.sourceID = sourceID;
+    }
 
     public String getTargetID() {
         return targetID;

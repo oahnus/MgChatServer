@@ -5,6 +5,7 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import top.oahnus.Bean.User;
+import top.oahnus.Util.MD5Util;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -77,5 +78,40 @@ public class UserDao {
         }
 
         return idList;
+    }
+
+    public String vertifyMail(String mail){
+        SqlSession sqlSession = null;
+        String retVal = "";
+
+        try {
+            Reader reader = Resources.getResourceAsReader("top/oahnus/Config/Configuration.xml");
+            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+
+            sqlSession = sqlSessionFactory.openSession();
+
+            IUser iUser = sqlSession.getMapper(IUser.class);
+            retVal = iUser.vertifyMail(mail);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return retVal;
+    }
+
+    public void addUser(User user){
+        SqlSession sqlSession = null;
+        try {
+            Reader reader = Resources.getResourceAsReader("top/oahnus/Config/Configuration.xml");
+            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
+
+            sqlSession = sqlSessionFactory.openSession();
+
+            IUser iUser = sqlSession.getMapper(IUser.class);
+            iUser.addUser(user);
+
+            sqlSession.commit();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

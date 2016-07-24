@@ -11,4 +11,6 @@ public interface IUser {
     User vertifyUser(User user);
     List<User> getFriendsList(String id);
     List<String> getFriendsID(String id);
+    String vertifyMail(String mail);
+    void addUser(User user);
 }

@@ -28,7 +28,8 @@
   </environments>
 
   <mappers>
-    <mapper resource="top/oahnus/config/User/user.xml"/>
+    <mapper resource="top/oahnus/Config/User/user.xml"/>
+    <mapper resource="top/oahnus/Config/Manager/manager.xml"/>
   </mappers>
 
 </configuration>
