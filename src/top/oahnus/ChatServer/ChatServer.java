@@ -33,7 +33,7 @@ public class ChatServer implements Runnable{
 System.out.println("服务器启动");
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("服务器启动失败");
+System.out.println("服务器启动失败");
         }
         while(isRunning){
             try {
@@ -73,16 +73,16 @@ System.out.println("创建Client成功");
             Client c = null;
             try {
                 while (isConnected) {
-                    System.out.println("准备接受消息");
+System.out.println("准备接受消息");
                     Message msg = (Message) ois.readObject();
-                    System.out.println("接受成功");
+System.out.println("接受成功");
                     if(msg.getCode().equals("CLOSE")){
 //                        close();
 //                        isConnected = false;
 //                        break;
-                        System.out.println("接收到关闭信息");
+System.out.println("接收到关闭信息");
                         closeClient();
-                        System.out.println("客户端数量"+clients.size());
+System.out.println("客户端数量"+clients.size());
                         break;
                     }else if(msg.getCode().equals("CHATIN")){
                         clientID = msg.getContent();
@@ -90,16 +90,16 @@ System.out.println("创建Client成功");
 
                     }else if(msg.getCode().equals("MSG")){
                         String target = msg.getTargetID();
-                        System.out.println("获取目标id，发送消息");
+System.out.println("获取目标id，发送消息");
                         if(clients.containsKey(target)){
                             clients.get(target).sendMsg(msg);
-                            System.out.println("发送成功");
+System.out.println("发送成功");
                         }else{
-                            System.out.println("未在线");
+System.out.println("未在线");
                             File file = new File("OfflineRecord/"+msg.getTargetID()+".txt");
                             if(!file.exists()){
                                 file.createNewFile();
-                                System.out.println("创建新文件");
+System.out.println("创建新文件");
                             }else{
 //                            FileWriter fw = new FileWriter(file,false);
 //                            fw.write(msg.getSourceID()+"#"+msg.getContent()+"\n");
@@ -108,47 +108,14 @@ System.out.println("创建Client成功");
                                 bw.write(msg.getSourceID()+"#"+msg.getContent());
                                 bw.newLine();
                                 bw.flush();
-                                System.out.println("写入记录成功");
+System.out.println("写入记录成功");
                             }
                         }
-                    }else if(msg.getCode().equals("LOGIN")){
-                        //如果有离线消息,将消息发送给客户端
-                        System.out.println("登陆信息接受到");
-                        File record = new File("OfflineRecord/"+clientID+".txt");
-                        if(record.exists()){
-                            BufferedReader br = new BufferedReader(new FileReader(record));
-                            String line = br.readLine();
-                            while(line!=null){
-                                Message message = new Message();
-                                message.setCode("MSG");
-                                message.setSourceID(line.split("#")[0]);
-                                message.setContent(line.split("#")[1]);
-
-                                oos.writeObject(message);
-                                oos.flush();
-                                line = br.readLine();
-                            }
-
-                            Message message = new Message();
-                            message.setCode("END");
-
-                            oos.writeObject(message);
-                            oos.flush();
-
-                            record.delete();
-                        }else{
-                            Message message = new Message();
-                            message.setCode("END");
-
-                            oos.writeObject(message);
-                            oos.flush();
-                        }
-                        record = null;
                     }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                System.out.println("发送过程中出错");
+System.out.println("发送过程中出错");
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }

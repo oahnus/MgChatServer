@@ -18,9 +18,9 @@ public class MgChatServerApplication {
         Thread vertifyThread = new Thread(authVertify);
         vertifyThread.start();
 
-//        MonitorServer monitorServer = new MonitorServer(ipMap);
-//        Thread monitorThread = new Thread(monitorServer);
-//        monitorThread.start();
+        MonitorServer monitorServer = new MonitorServer();
+        Thread monitorThread = new Thread(monitorServer);
+        monitorThread.start();
 
         ChatServer chatServer = new ChatServer();
         Thread chatServerThread = new Thread(chatServer);

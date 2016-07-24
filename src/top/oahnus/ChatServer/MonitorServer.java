@@ -1,11 +1,16 @@
 package top.oahnus.ChatServer;
 
+import top.oahnus.Bean.Message;
 import top.oahnus.Bean.User;
 import top.oahnus.Dao.UserDao;
 
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.BindException;
 import java.net.ServerSocket;
@@ -19,29 +24,18 @@ import java.util.Map;
  */
 
 /**
- * 留待后用
- */
-
-/**
- * 创建一个客户端子类，没链接进一个新的客户端，创建一个新的线程，并监听客户端状态
- * 客户端登陆时，将客户端通过流发送的ip地址保存在map中
- * 之后将客户端id所对应的所有的好友的ip地址封装在一个map中，传回给客户端
- * 当客户端关闭时，发送一个关闭信息，当接受关闭信息时，将此id所对应的ip地址从map中remove
+ * 处理登陆时客户端发来的查询离线信息请求
  */
 
 public class MonitorServer implements Runnable{
 
     private ServerSocket serverSocket = null;
-    private Map<String,String> ipMap  = new HashMap<>();
+    private Socket socket = null;
     private boolean isRunning         = false;
 
-    public MonitorServer(Map<String,String> ipMap){
-        this.ipMap = ipMap;
-    }
-
-    public void init(){
+    public MonitorServer(){
         try {
-            serverSocket = new ServerSocket(8889);
+            serverSocket = new ServerSocket(8885);
         }
         catch (BindException e){
 System.out.println("端口被占用");
@@ -49,124 +43,89 @@ System.out.println("端口被占用");
         catch (IOException e) {
             e.printStackTrace();
         }
-        isRunning = true;
     }
 
     public void runMonitor(){
-        while(isRunning) {
+
+    }
+
+    public void run() {
+System.out.println("开始监听8885");
+        while(true) {
             try {
-                Socket socket = serverSocket.accept();
-                if (socket != null) {
-                    Client client = new Client(socket);
-                    Thread thread = new Thread(client);
-                    thread.start();
-                }
+                socket = serverSocket.accept();
+
+                Client client = new Client(socket);
+                Thread thread = new Thread(client);
+                thread.start();
+System.out.println("创建CLIENT");
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-    }
-
-    @Override
-    public void run() {
-        init();
-        runMonitor();
-    }
-
-    public static void main(String[] args){
-        Map<String,String> ips = new HashMap<>();
-        ips.put("10001","192.168.1.1");
-        MonitorServer monitorServer = new MonitorServer(ips);
-        monitorServer.init();
-        monitorServer.runMonitor();
     }
 
     class Client implements Runnable{
         private Socket socket             = null;
-        private boolean isRunning         = false;
-        private DataInputStream dis       = null;
-        private DataOutputStream dos      = null;
+        private ObjectInputStream ois       = null;
+        private ObjectOutputStream oos      = null;
 
         Client(Socket socket){
             try {
+                oos = new ObjectOutputStream(socket.getOutputStream());
+                ois = new ObjectInputStream(socket.getInputStream());
                 this.socket = socket;
-                dis         = new DataInputStream(socket.getInputStream());
-                dos         = new DataOutputStream(socket.getOutputStream());
-                isRunning   = true;
-            }
-            catch (IOException e) {
+            }catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
-        @Override
         public void run() {
-            String clientIP   = "";
-            String clientID   = "";
-            String clientInfo = "";
-            String opCode     = "";
-            Map<String,String> retIDs = new HashMap<>();
+System.out.println("新链接介入");
+            try{
+                Message message = (Message) ois.readObject();
+                File record = new File("OfflineRecord/"+"10001"+".txt");
+System.out.println("查找离线记录");
 
-            try {
-                clientInfo = dis.readUTF();
-                String[] infos = clientInfo.split("#");
+                if(record.exists()){
+                    BufferedReader br = new BufferedReader(new FileReader(record));
+                    String line = br.readLine();
+                    while(line!=null){
+                        Message offMsg = new Message();
+                        offMsg.setCode("MSG");
+                        offMsg.setSourceID(line.split("#")[0]);
+                        offMsg.setContent(line.split("#")[1]);
 
-                if(infos[0].equals("PUTIP")) {
-                    clientID = infos[1];
-                    clientIP = infos[2];
-                    if (!ipMap.containsKey(clientID)) {
-                        ipMap.put(clientID, clientIP);
-                    } else {
-
+                        oos.writeObject(offMsg);
+                        oos.flush();
+                        line = br.readLine();
+System.out.println("发送消息");
                     }
-                }
-                if(infos[1].equals("GETIP")){
-                    clientID = infos[1];
 
-                    if(ipMap.containsKey(clientID)){
-                        String ip = ipMap.get(clientID);
-                        dos.writeUTF(ip);
-                        dos.flush();
-                    }else{
-                        dos.writeUTF("NULL");
-                        dos.flush();
-                    }
+                    Message endMsg = new Message();
+                    endMsg.setCode("END");
+
+                    oos.writeObject(endMsg);
+                    oos.flush();
+
+                    record.delete();
+System.out.println("发送结束");
+                }else{
+                    Message endMsg = new Message();
+                    endMsg.setCode("END");
+
+                    oos.writeObject(endMsg);
+                    oos.flush();
                 }
-//                //从数据库中读取对应ID的所有好友，再将所有好友的ip地址放入一个map中传回给客户端
-//                User user = new User();
-//                user.setUserID(clientID);
-//
-//                UserDao userDao = new UserDao();
-//                List<String> ids = userDao.getFriendsID(clientID);
-//
-//                for(String id: ids){
-//                    if(ipMap.containsKey(id)){
-//                        retIDs.put(id,ipMap.get(id));
-//                    }
-//                }
-//
-//                oos.writeObject(retIDs);
-//                oos.flush();
-//
-//                Thread.sleep(3000);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }finally{
-                close();
+                record = null;
+            }catch (IOException e) {
+                // TODO: handle exception
             }
-        }
-
-        private void close(){
-            try {
-                if(dis!=null) {
-                    dis.close();
-                }
-                if(dos!=null){
-                    dos.close();
-                }
-            } catch (IOException e) {
+            catch (ClassNotFoundException e) {
+                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
+
         }
     }
 }
