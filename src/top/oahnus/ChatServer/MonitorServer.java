@@ -32,6 +32,7 @@ public class MonitorServer implements Runnable{
     private ServerSocket serverSocket = null;
     private Socket socket = null;
     private boolean isRunning         = false;
+    private Map<String,ObjectOutputStream> onlineClient = new HashMap<>();
 
     public MonitorServer(){
         try {
@@ -43,10 +44,6 @@ System.out.println("端口被占用");
         catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public void runMonitor(){
-
     }
 
     public void run() {
@@ -65,8 +62,12 @@ System.out.println("创建CLIENT");
         }
     }
 
+    public Map<String, ObjectOutputStream> getOnlineClient() {
+        return onlineClient;
+    }
+
     class Client implements Runnable{
-        private Socket socket             = null;
+        private Socket cSocket              = null;
         private ObjectInputStream ois       = null;
         private ObjectOutputStream oos      = null;
 
@@ -74,7 +75,7 @@ System.out.println("创建CLIENT");
             try {
                 oos = new ObjectOutputStream(socket.getOutputStream());
                 ois = new ObjectInputStream(socket.getInputStream());
-                this.socket = socket;
+                this.cSocket = socket;
             }catch (IOException e) {
                 e.printStackTrace();
             }
@@ -84,8 +85,10 @@ System.out.println("创建CLIENT");
 System.out.println("新链接介入");
             try{
                 Message message = (Message) ois.readObject();
-                File record = new File("OfflineRecord/"+"10001"+".txt");
+                File record = new File("OfflineRecord/"+message.getSourceID()+".txt");
 System.out.println("查找离线记录");
+
+                onlineClient.put(message.getSourceID(),oos);
 
                 if(record.exists()){
                     BufferedReader br = new BufferedReader(new FileReader(record));
@@ -108,6 +111,7 @@ System.out.println("发送消息");
                     oos.writeObject(endMsg);
                     oos.flush();
 
+                    br.close();
                     record.delete();
 System.out.println("发送结束");
                 }else{
@@ -119,13 +123,24 @@ System.out.println("发送结束");
                 }
                 record = null;
             }catch (IOException e) {
-                // TODO: handle exception
             }
             catch (ClassNotFoundException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
 
+            try{
+                Message closeMsg = (Message) ois.readObject();
+                String code = closeMsg.getCode();
+                if(code.equals("CLOSECLIENT")){
+                    onlineClient.remove(closeMsg.getSourceID());
+                }
+System.out.println("接受到关闭客户端命令");
+System.out.println("剩余客户端个数"+onlineClient.size());
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

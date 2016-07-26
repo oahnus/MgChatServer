@@ -12,17 +12,20 @@ import java.util.Map;
 //服务器主程序
 public class MgChatServerApplication {
     public static void main(String[] args){
-        Map<String, String> ipMap = new HashMap<>();
 
+        //登陆验证
         AuthVertify authVertify = new AuthVertify();
         Thread vertifyThread = new Thread(authVertify);
         vertifyThread.start();
 
+        //离线消息查询
         MonitorServer monitorServer = new MonitorServer();
         Thread monitorThread = new Thread(monitorServer);
         monitorThread.start();
 
+        //聊天服务器
         ChatServer chatServer = new ChatServer();
+        chatServer.setOnlineClient(monitorServer.getOnlineClient());
         Thread chatServerThread = new Thread(chatServer);
         chatServerThread.start();
     }

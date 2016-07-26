@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Map;
 
 /**
  * Created by oahnus on 2016/7/4.
@@ -54,16 +55,10 @@ System.out.println("socket error");
                 in = new ObjectInputStream(socket.getInputStream());
                 User user = (User) in.readObject();
 
-System.out.println(user.getUserID());
-System.out.println(user.getPassword());
-
                 user = vertify(user);
 
                 if(user!=null) {
                     out = new ObjectOutputStream(socket.getOutputStream());
-
-System.out.println("输出");
-
                     out.writeObject(user);
                     out.flush();
                 }
@@ -80,7 +75,6 @@ System.out.println("输出");
                     if(out!=null) {
                         out.close();
                     }
-
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

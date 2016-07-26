@@ -22,6 +22,8 @@ public class ChatServer implements Runnable{
 
     private BufferedWriter bw;
 
+    private Map<String,ObjectOutputStream> onlineClientMap = new HashMap<>();
+
     public ChatServer(){
 
     }
@@ -49,8 +51,12 @@ System.out.println("创建Client成功");
 
     }
 
+    public void setOnlineClient(Map<String,ObjectOutputStream> onlineClientMap) {
+        this.onlineClientMap = onlineClientMap;
+    }
+
     class Client implements Runnable{
-        private Socket socket = null;
+        private Socket cSocket = null;
         private ObjectInputStream ois = null;
         private ObjectOutputStream oos = null;
         private boolean isConnected = false;
@@ -60,9 +66,9 @@ System.out.println("创建Client成功");
         public Client(Socket socket) {
             isConnected = true;
             try {
-                ois = new ObjectInputStream(socket.getInputStream());
-                oos = new ObjectOutputStream(socket.getOutputStream());
-                this.socket = socket;
+                this.cSocket = socket;
+                ois = new ObjectInputStream(cSocket.getInputStream());
+                oos = new ObjectOutputStream(cSocket.getOutputStream());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -70,16 +76,12 @@ System.out.println("创建Client成功");
 
         @Override
         public void run() {
-            Client c = null;
             try {
                 while (isConnected) {
 System.out.println("准备接受消息");
                     Message msg = (Message) ois.readObject();
 System.out.println("接受成功");
                     if(msg.getCode().equals("CLOSE")){
-//                        close();
-//                        isConnected = false;
-//                        break;
 System.out.println("接收到关闭信息");
                         closeClient();
 System.out.println("客户端数量"+clients.size());
@@ -87,27 +89,39 @@ System.out.println("客户端数量"+clients.size());
                     }else if(msg.getCode().equals("CHATIN")){
                         clientID = msg.getContent();
                         clients.put(msg.getContent(),this);
-
                     }else if(msg.getCode().equals("MSG")){
                         String target = msg.getTargetID();
 System.out.println("获取目标id，发送消息");
                         if(clients.containsKey(target)){
                             clients.get(target).sendMsg(msg);
 System.out.println("发送成功");
-                        }else{
+                        } else if(onlineClientMap.containsKey(msg.getTargetID())){
+System.out.println(msg.getTargetID()+"在线，未打开聊天室");
+                            // 之前map中保存的键值对为String，socket，通过获取socket后封装成ObjectOutputStream
+                            // 运行后客户端出错
+                            // java.io.StreamCorruptedException: invalid type code: AC
+                            // 原因是对socket.getOutputStream进行了两次封装，此处为一处，MonitorServer中一处
+                            ObjectOutputStream oos = onlineClientMap.get(msg.getTargetID());
+
+                            oos.writeObject(msg);
+                            oos.flush();
+                        } else{
 System.out.println("未在线");
                             File file = new File("OfflineRecord/"+msg.getTargetID()+".txt");
                             if(!file.exists()){
                                 file.createNewFile();
-System.out.println("创建新文件");
-                            }else{
-//                            FileWriter fw = new FileWriter(file,false);
-//                            fw.write(msg.getSourceID()+"#"+msg.getContent()+"\n");
                                 BufferedWriter bw = new BufferedWriter(new FileWriter(file,true));
-//                            bw.append(msg.getSourceID()+"#"+msg.getContent()+"\n");
                                 bw.write(msg.getSourceID()+"#"+msg.getContent());
                                 bw.newLine();
                                 bw.flush();
+                                bw.close();
+System.out.println("创建新文件");
+                            }else{
+                                BufferedWriter bw = new BufferedWriter(new FileWriter(file,true));
+                                bw.write(msg.getSourceID()+"#"+msg.getContent());
+                                bw.newLine();
+                                bw.flush();
+                                bw.close();
 System.out.println("写入记录成功");
                             }
                         }
@@ -135,7 +149,6 @@ System.out.println("发送过程中出错");
                 }
                 clients.remove(clientID);
             } catch (IOException e) {
-                // TODO: handle exception
             }
         }
 
