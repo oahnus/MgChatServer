@@ -1,6 +1,7 @@
 package top.oahnus.Application;
 
 import top.oahnus.Bean.User;
+import top.oahnus.Dao.ManagerDao;
 import top.oahnus.Dao.UserDao;
 
 import java.io.IOException;
@@ -9,6 +10,8 @@ import java.io.ObjectOutputStream;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,10 +28,6 @@ public class AuthVertify implements Runnable{
     private boolean started = false;
 
     public AuthVertify(){
-
-    }
-
-    public void init(){
         try {
             serverSocket = new ServerSocket(8887);
 
@@ -47,71 +46,75 @@ System.out.println("socket error");
         return userDao.getUserFromDB(user);
     }
 
-    public void runApp(){
+    @Override
+    public void run() {
         while(started){
             try {
                 socket = serverSocket.accept();
 
-                in = new ObjectInputStream(socket.getInputStream());
-                User user = (User) in.readObject();
+                Client client = new Client(socket);
+                Thread thread = new Thread(client);
+                thread.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
-                user = vertify(user);
+    class Client implements Runnable{
 
-                if(user!=null) {
-                    out = new ObjectOutputStream(socket.getOutputStream());
-                    out.writeObject(user);
-                    out.flush();
+        private Socket cSocket              = null;
+        private ObjectInputStream ois       = null;
+        private ObjectOutputStream oos      = null;
+
+        Client(Socket socket){
+            try {
+                oos = new ObjectOutputStream(socket.getOutputStream());
+                ois = new ObjectInputStream(socket.getInputStream());
+                this.cSocket = socket;
+            }catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void run() {
+            User user = null;
+            Map<String,Object> map;
+            try {
+                map = (Map<String, Object>) ois.readObject();
+                if(map.containsKey("vertify")) {
+                    user = (User) map.get("vertify");
+                    user = vertify(user);
+
+                    oos.writeObject(user);
+                    oos.flush();
+                }
+                else if(map.containsKey("findFriend")){
+                    user = (User) map.get("findFriend");
+                    ManagerDao managerDao = new ManagerDao();
+
+                    List<User> list = managerDao.findUser(user);
+                    oos.writeObject(list);
+                    oos.flush();
+                }
+                else if(map.containsKey("addFriend")){
+                    Map<String,String> param = new HashMap<>();
+                    param.put("userid",map.get("userid").toString());
+                    param.put("friendid",map.get("friendid").toString());
+
+                    ManagerDao managerDao = new ManagerDao();
+                    managerDao.addFriend(param);
+
+                    param.put("userid",map.get("friendid").toString());
+                    param.put("friendid",map.get("userid").toString());
+                    managerDao.addFriend(param);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
-            finally {
-                try {
-                    if(in!=null) {
-                        in.close();
-                    }
-                    if(out!=null) {
-                        out.close();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
-
-    @Override
-    public void run() {
-        init();
-        runApp();
-    }
-    public static void main(String[] args){
-        AuthVertify authVertify = new AuthVertify();
-
-//测试
-//        User user = new User();
-//        user.setUserID("10000");
-//        user.setPassword("b86d51d4ce12cdf48d69ed20063bfd40");
-//
-//        User ret = authVertify.vertify(user);
-//
-//        System.out.println(ret.getFigureImage());
-//
-//        System.out.println(ret.getUsername());
-//        System.out.println(ret.getUserID());
-//        System.out.println(ret.getPassword());
-//        System.out.println(ret.getInfo());
-//        System.out.println(ret.getBorn());
-//        System.out.println(ret.getAddress());
-//        System.out.println(ret.getSex());
-//        System.out.println(ret.getFigure());
-//
-//        List<User> list = ret.getFriendsList();
-//        for(int i=0;i<list.size();i++){
-//            System.out.println(list.get(i).getUsername());
-//        }
-    }
-
 }

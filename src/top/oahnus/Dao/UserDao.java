@@ -40,8 +40,9 @@ public class UserDao {
 
             IUser iUser = sqlSession.getMapper(IUser.class);
             retUser = iUser.vertifyUser(user);
-            retUser.setFriendsList(iUser.getFriendsList(user.getUserID()));
-
+            if(retUser!=null) {
+                retUser.setFriendsList(iUser.getFriendsList(user.getUserID()));
+            }
 //System.out.println(basePath+"\\"+retUser.getFigure());
 //            Image image = ImageIO.read(new File(basePath+"\\"+retUser.getFigure()));
 //            image = image.getScaledInstance(40,40,Image.SCALE_DEFAULT);

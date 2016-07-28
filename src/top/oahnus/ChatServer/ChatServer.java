@@ -40,6 +40,7 @@ System.out.println("服务器启动失败");
         while(isRunning){
             try {
                 socket = serverSocket.accept();
+//                Client client = new Client(1,socket,onlineClientMap,clients);
                 Client client = new Client(socket);
                 Thread thread = new Thread(client);
                 thread.start();

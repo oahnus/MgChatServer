@@ -4,7 +4,35 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <!-- 用包名接口名作namespace的名称 -->
 <mapper namespace="top.oahnus.Dao.IManager">
+  <resultMap type="top.oahnus.Bean.User" id="RetUser">
+    <result column="USER_ID" jdbcType="VARCHAR" property="userID"/>
+    <result column="USERNAME" jdbcType="VARCHAR" property="username"/>
+    <result column="SEX" jdbcType="VARCHAR" property="sex"/>
+    <result column="ADDRESS" jdbcType="VARCHAR" property="address"/>
+    <result column="FIGURE" jdbcType="VARCHAR" property="figure"/>
+  </resultMap>
+
   <select id="getLastUserID" resultType="long">
     SELECT user_id FROM user ORDER BY user_id DESC LIMIT 1
   </select>
+
+  <select id="findUser" resultMap="RetUser" parameterType="top.oahnus.Bean.User">
+    SELECT USER_ID, USERNAME, SEX, ADDRESS, FIGURE FROM user WHERE 1 = 1
+    <if test="userID!=null and !&quot;&quot;.equals(userID.trim())">
+      AND user_id = #{userID}
+    </if>
+    <if test="username!=null and !&quot;&quot;.equals(username.trim())">
+      AND username = #{username}
+    </if>
+    <if test="sex!=null and !sex.equals(&quot;不限&quot;)">
+      AND sex = #{sex}
+    </if>
+    <if test="address!=null and !address.equals(&quot;不限不限&quot;)">
+      AND address = #{address}
+    </if>
+  </select>
+  
+  <insert id="addFriend" parameterType="java.util.Map">
+    INSERT INTO friend (user_id,friend_id) VALUES (#{userid},#{friendid})
+  </insert>
 </mapper>

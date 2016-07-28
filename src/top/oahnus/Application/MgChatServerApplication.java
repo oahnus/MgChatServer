@@ -13,17 +13,17 @@ import java.util.Map;
 public class MgChatServerApplication {
     public static void main(String[] args){
 
-        //登陆验证
+        //登陆验证 8887
         AuthVertify authVertify = new AuthVertify();
         Thread vertifyThread = new Thread(authVertify);
         vertifyThread.start();
 
-        //离线消息查询
+        //离线消息查询 8885
         MonitorServer monitorServer = new MonitorServer();
         Thread monitorThread = new Thread(monitorServer);
         monitorThread.start();
 
-        //聊天服务器
+        //聊天服务器 8888
         ChatServer chatServer = new ChatServer();
         chatServer.setOnlineClient(monitorServer.getOnlineClient());
         Thread chatServerThread = new Thread(chatServer);

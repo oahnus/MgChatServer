@@ -1,12 +1,8 @@
 package top.oahnus.ChatServer;
 
 import top.oahnus.Bean.Message;
-import top.oahnus.Bean.User;
-import top.oahnus.Dao.UserDao;
 
 import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -16,7 +12,6 @@ import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,7 +26,6 @@ public class MonitorServer implements Runnable{
 
     private ServerSocket serverSocket = null;
     private Socket socket = null;
-    private boolean isRunning         = false;
     private Map<String,ObjectOutputStream> onlineClient = new HashMap<>();
 
     public MonitorServer(){
@@ -52,6 +46,7 @@ System.out.println("开始监听8885");
             try {
                 socket = serverSocket.accept();
 
+//                Client client = new Client(2,socket,onlineClient);
                 Client client = new Client(socket);
                 Thread thread = new Thread(client);
                 thread.start();
