@@ -79,6 +79,11 @@ System.out.println("创建CLIENT");
         public void run() {
 System.out.println("新链接介入");
             try{
+                File file = new File("OfflineRecord");
+                if(!file.exists()) {
+                    file.mkdir();
+                }
+
                 Message message = (Message) ois.readObject();
                 File record = new File("OfflineRecord/"+message.getSourceID()+".txt");
 System.out.println("查找离线记录");
