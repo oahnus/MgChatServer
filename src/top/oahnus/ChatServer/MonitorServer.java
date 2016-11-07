@@ -30,7 +30,7 @@ public class MonitorServer implements Runnable{
 
     public MonitorServer(){
         try {
-            serverSocket = new ServerSocket(8885);
+            serverSocket = new ServerSocket(7885);
         }
         catch (BindException e){
 System.out.println("端口被占用");
@@ -41,7 +41,7 @@ System.out.println("端口被占用");
     }
 
     public void run() {
-System.out.println("开始监听8885");
+System.out.println("开始监听7885");
         while(true) {
             try {
                 socket = serverSocket.accept();

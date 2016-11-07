@@ -30,7 +30,7 @@ public class ChatServer implements Runnable{
 
     public void run(){
         try {
-            serverSocket = new ServerSocket(8888);
+            serverSocket = new ServerSocket(7888);
             isRunning = true;
 System.out.println("服务器启动");
         } catch (IOException e) {

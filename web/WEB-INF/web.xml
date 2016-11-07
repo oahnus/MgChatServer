@@ -6,7 +6,7 @@
     
     <servlet>
         <servlet-name>vertify</servlet-name>
-        <servlet-class>top.oahnus.Servlet.MailVertifyServlet</servlet-class>
+        <servlet-class>top.oahnus.Servlet.MailVerifyServlet</servlet-class>
     </servlet>
     
     <servlet-mapping>
